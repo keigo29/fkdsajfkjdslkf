@@ -242,6 +242,16 @@
   .day-head { margin-left: 0; margin-right: 0; }
   .month, .icon-btn, .chip { box-shadow: none; }
   .cats { padding: 6px 4px 4px; }
+  /* 「今月あと使える」だけは黒いグラデーションのカード。中は白文字と明るめの緑・赤 */
+  .hero.hero-main {
+    --text: #ffffff; --muted: rgba(255,255,255,.6); --bg: #1c1c1e; --line: rgba(255,255,255,.1);
+    --pos: #34c759; --danger: #ff6369; --warn: #ff9f0a; --tint: 28%;
+    background: linear-gradient(145deg, #3a3a3c 0%, #000000 100%); color: var(--text);
+    border-radius: var(--radius-lg); padding: 24px; margin: 4px 0 8px; border-bottom: 0;
+    box-shadow: 0 18px 36px -20px rgba(0,0,0,.55);
+  }
+  .hero.hero-main .flow { background: color-mix(in srgb, var(--fc, #fff) 18%, #1c1c1e); }
+  .hero.hero-main .bar { background: color-mix(in srgb, var(--s, #fff) 22%, #2c2c2e); }
   .sheet .pill { margin-top: 8px; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
