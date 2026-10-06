@@ -1,6 +1,6 @@
 // オフラインでも開けるように、アプリ本体をキャッシュする
 // ファイルを更新したら CACHE の番号を上げると、利用者側も新しい版に切り替わる
-const CACHE = 'kakei-v2';
+const CACHE = 'kakei-v3';
 const FILES = [
   './',
   './index.html',
