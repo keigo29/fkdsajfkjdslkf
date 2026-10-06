@@ -65,7 +65,7 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: var(--bg); color: var(--text); }
   body {
-    font-family: "Manrope", "M PLUS 2", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    font-family: "Inter", "IBM Plex Sans JP", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
     font-feature-settings: "palt";
     min-height: 100dvh;
     padding-bottom: calc(100px + env(safe-area-inset-bottom));
@@ -91,7 +91,7 @@
 
   .hero { background: var(--surface); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 12px; }
   /* ホームの黒いカード：カード内だけ色の変数を差し替える */
-  .hero-dark { box-shadow: 0 14px 30px -16px rgba(0,0,0,.5); }
+
   .hero-dark .link { color: #ffffff; }
   .hero-actions { display: flex; align-items: center; gap: 8px; }
   .eye { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
@@ -109,7 +109,7 @@
   .flow b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   body.masked .mask { filter: blur(9px); user-select: none; }
   .label { color: var(--muted); font-size: 14px; font-weight: 500; }
-  .big { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin: 6px 0 2px; }
+  .big { font-size: 44px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.15; margin: 6px 0 2px; }
   .big small { font-size: 22px; font-weight: 700; margin-right: 2px; letter-spacing: 0; }
   .hero-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .bar { position: relative; height: 10px; border-radius: 999px; background: var(--bg); margin-top: 16px; overflow: hidden; }
@@ -254,6 +254,17 @@
     --bar-muted: #4a4a4d; --bar-on-1: #ffffff; --bar-on-2: #c7c7cc;
     --strong: linear-gradient(135deg, #ffffff 0%, #d1d1d6 100%); --on-strong: #000000;
     background: var(--card-bg); color: var(--text); color-scheme: dark;
+  }
+  /* カードの軽い影と、上辺のうっすらしたハイライト */
+  .hero, .tile, .list, .chart, .empty {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 1px 2px rgba(0,0,0,.10), 0 10px 24px -14px rgba(0,0,0,.40);
+  }
+  /* いちばん大事なカードだけ、予算の状態の色でグラデーションの枠をつける（予算なしは水色） */
+  .hero.hero-dark {
+    border: 1.5px solid transparent;
+    background: var(--card-bg) padding-box,
+      linear-gradient(135deg, color-mix(in srgb, var(--s, #4aa3ee) 95%, transparent) 0%, #3a3a3d 38%, #2a2a2d 62%, color-mix(in srgb, var(--s, #4aa3ee) 60%, transparent) 100%) border-box;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 2px 4px rgba(0,0,0,.10), 0 18px 34px -18px color-mix(in srgb, var(--s, #4aa3ee) 55%, rgba(0,0,0,.6));
   }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
@@ -564,6 +575,7 @@
   const byNewest = (a, b) => (b.date.localeCompare(a.date)) || (b.createdAt - a.createdAt);
 
   // ---- ホーム ----
+  const heroState = (cls) => { $('.hero-dark').classList.remove('s-good', 's-warn', 's-bad', 's-none'); $('.hero-dark').classList.add(cls); };
   function renderHome() {
     const s = sums(month);
     const isNow = month === ym(today());
@@ -587,6 +599,7 @@
       $('#homeFlow2Icon').className = 'out'; $('#homeFlow2Icon').innerHTML = icon('arrow-up');
       const st = over ? ['s-bad', '予算オーバー'] : room >= 0 ? ['s-good', isNow ? '予算内のペース' : '予算内でした'] : ['s-warn', 'ペースが早め'];
       $('#homeStatus').innerHTML = `<span class="status ${st[0]}">${st[1]}</span>`;
+      heroState(st[0]);
       const pace = isNow
         ? `今日までの目安 <b class="num mask">${yen(ideal)}</b> ・ ${room >= 0 ? `<b class="num mask t-good">${yen(room)} 余裕</b>` : `<b class="num mask t-warn">${yen(-room)} 使いすぎ</b>`}`
         : '';
@@ -601,6 +614,7 @@
       $('#homeFlow2L').textContent = '収支'; $('#homeFlow2').textContent = signed(s.net);
       $('#homeFlow2Icon').className = 'net'; $('#homeFlow2Icon').innerHTML = icon('arrow-left-right');
       $('#homeStatus').innerHTML = '';
+      heroState('s-none');
       $('#budgetBox').innerHTML = `<div class="hero-foot"><span>予算を決めると残りが分かります</span><button class="link" id="setBudgetLink">設定する</button></div>`;
     }
 
