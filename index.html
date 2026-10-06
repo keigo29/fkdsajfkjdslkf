@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="家計">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="fonts/zen-kaku-gothic-new.css">
+<link rel="stylesheet" href="fonts/app-fonts.css">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>家計</title>
@@ -25,7 +25,8 @@
     --pos: #16884a;
     --warn: #c96a00;
     --tint: 14%;
-    --hero-bg: linear-gradient(135deg, #2c2c2e 0%, #000000 100%);
+    --card-bg: linear-gradient(160deg, #2a2a2c 0%, #0a0a0b 100%);
+    --card-inner: #303033;
     --accent: linear-gradient(135deg, #8fd3ff 0%, #4aa3ee 100%);
     --grad: linear-gradient(135deg, #3a3a3c 0%, #000000 100%);
     --on-grad: #ffffff;
@@ -57,13 +58,14 @@
       --pos: #34c759;
       --warn: #ff9f0a;
       --tint: 24%;
-      --hero-bg: linear-gradient(135deg, #3a3a3c 0%, #1c1c1e 100%);
+      --card-bg: linear-gradient(160deg, #2c2c2f 0%, #161618 100%);
+      --card-inner: #3a3a3d;
     }
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: var(--bg); color: var(--text); }
   body {
-    font-family: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    font-family: "Manrope", "M PLUS 2", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
     font-feature-settings: "palt";
     min-height: 100dvh;
     padding-bottom: calc(100px + env(safe-area-inset-bottom));
@@ -89,8 +91,7 @@
 
   .hero { background: var(--surface); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 12px; }
   /* ホームの黒いカード：カード内だけ色の変数を差し替える */
-  .hero-dark { --text: #ffffff; --muted: rgba(255,255,255,.6); --bg: #2c2c2e; --pos: #34c759; --warn: #ff9f0a; --danger: #ff6369; --tint: 26%;
-    background: var(--hero-bg); color: var(--text); box-shadow: 0 12px 28px -14px rgba(0,0,0,.45); }
+  .hero-dark { box-shadow: 0 14px 30px -16px rgba(0,0,0,.5); }
   .hero-dark .link { color: #ffffff; }
   .hero-actions { display: flex; align-items: center; gap: 8px; }
   .eye { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
@@ -108,7 +109,7 @@
   .flow b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   body.masked .mask { filter: blur(9px); user-select: none; }
   .label { color: var(--muted); font-size: 14px; font-weight: 500; }
-  .big { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin: 6px 0 2px; }
+  .big { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin: 6px 0 2px; }
   .big small { font-size: 22px; font-weight: 700; margin-right: 2px; letter-spacing: 0; }
   .hero-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .bar { position: relative; height: 10px; border-radius: 999px; background: var(--bg); margin-top: 16px; overflow: hidden; }
@@ -162,7 +163,7 @@
   .empty .em-icon svg { width: 28px; height: 28px; }
   .empty b { display: block; color: var(--text); font-size: 17px; margin-bottom: 4px; }
 
-  .pill { height: 56px; border-radius: 999px; background: var(--grad); color: var(--on-grad); font-size: 17px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: transform .12s ease, opacity .12s; }
+  .pill { height: 56px; border-radius: 999px; background: var(--accent); color: #ffffff; box-shadow: 0 8px 18px -10px #3d9be9; font-size: 17px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: transform .12s ease, opacity .12s; }
   .pill:active { transform: scale(.97); opacity: .9; }
   .pill svg { width: 20px; height: 20px; stroke-width: 2.4; }
 
@@ -246,6 +247,14 @@
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
   .hidden { display: none !important; }
   .footnote { color: var(--muted); font-size: 13px; line-height: 1.7; margin: 14px 4px 0; }
+  /* 黒いカード：カードの中だけ色の変数を差し替える（ライト・ダーク共通） */
+  .hero, .tile, .list, .chart, .empty, .field, .amount, .seg, .month, .icon-btn, .chip {
+    --text: #ffffff; --muted: rgba(255,255,255,.58); --bg: var(--card-inner); --line: rgba(255,255,255,.08); --surface-2: #48484a;
+    --pos: #34c759; --warn: #ff9f0a; --danger: #ff6369; --tint: 26%;
+    --bar-muted: #4a4a4d; --bar-on-1: #ffffff; --bar-on-2: #c7c7cc;
+    --strong: linear-gradient(135deg, #ffffff 0%, #d1d1d6 100%); --on-strong: #000000;
+    background: var(--card-bg); color: var(--text); color-scheme: dark;
+  }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 </head>

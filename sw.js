@@ -5,7 +5,7 @@ const FILES = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './fonts/zen-kaku-gothic-new.css',
+  './fonts/app-fonts.css',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png'
