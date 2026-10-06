@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f2f2f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="家計">
@@ -13,49 +12,29 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>家計</title>
 <style>
+  /* 白地にグレーの塗りは使わない。ボタンは黒のグラデーション、金額は緑（入る・余裕）と赤（出る・超過） */
   :root {
-    --bg: #f2f2f5;
+    color-scheme: light;
+    --bg: #ffffff;
     --surface: #ffffff;
-    --surface-2: #e5e5ea;
     --text: #0a0a0a;
-    --muted: #8a8a8e;
-    --line: #eeeef1;
+    --muted: #7c7c82;
+    --line: rgba(0,0,0,.06);
     --danger: #e5484d;
-    --pos: #16884a;
-    --warn: #c96a00;
+    --pos: #12a150;
+    --warn: #e08600;
     --tint: 14%;
-    --accent: linear-gradient(135deg, #8fd3ff 0%, #4aa3ee 100%);
-    --grad: linear-gradient(135deg, #3a3a3c 0%, #000000 100%);
+    --grad: linear-gradient(135deg, #48484a 0%, #000000 100%);
     --on-grad: #ffffff;
     --strong: var(--grad);
     --on-strong: #ffffff;
-    --bar-muted: #d4d4d8;
-    --bar-on-1: #3a3a3c;
+    --pos-grad: linear-gradient(135deg, #5ee08f 0%, #12a150 100%);
+    --neg-grad: linear-gradient(135deg, #ff8a8f 0%, #e5484d 100%);
+    --bar-on-1: #48484a;
     --bar-on-2: #000000;
-    --ring: #0a0a0a;
+    --shadow: 0 0 0 1px rgba(0,0,0,.035), 0 2px 6px -2px rgba(0,0,0,.08), 0 14px 32px -18px rgba(0,0,0,.18);
     --radius-lg: 28px;
     --radius-md: 20px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #000000;
-      --surface: #1c1c1e;
-      --surface-2: #2c2c2e;
-      --text: #f5f5f5;
-      --muted: #8e8e93;
-      --line: #2a2a2d;
-      --grad: linear-gradient(135deg, #48484a 0%, #1c1c1e 100%);
-      --strong: linear-gradient(135deg, #ffffff 0%, #c7c7cc 100%);
-      --on-strong: #000000;
-      --bar-muted: #3a3a3c;
-      --bar-on-1: #ffffff;
-      --bar-on-2: #c7c7cc;
-      --ring: #f5f5f5;
-      --danger: #ff6369;
-      --pos: #34c759;
-      --warn: #ff9f0a;
-      --tint: 24%;
-    }
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; background: var(--bg); color: var(--text); }
@@ -74,12 +53,12 @@
   .lucide { width: 24px; height: 24px; flex: 0 0 auto; }
 
   .top { display: flex; align-items: center; justify-content: space-between; height: 44px; gap: 8px; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 700; }
-  .month { display: inline-flex; align-items: center; background: var(--surface); border-radius: 999px; height: 40px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--grad); color: var(--on-grad); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 700; }
+  .month { display: inline-flex; align-items: center; background: var(--grad); color: var(--on-grad); border-radius: 999px; height: 40px; }
   .month button { width: 36px; height: 40px; display: grid; place-items: center; }
   .month button svg { width: 18px; height: 18px; }
   .month b { font-size: 14px; min-width: 84px; text-align: center; }
-  .icon-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; flex: 0 0 auto; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--grad); color: var(--on-grad); display: grid; place-items: center; flex: 0 0 auto; }
   .icon-btn svg { width: 20px; height: 20px; }
   h1 { font-size: 34px; letter-spacing: -0.02em; font-weight: 700; margin: 20px 0 4px; }
   .sub { color: var(--muted); font-size: 15px; margin: 0 0 24px; }
@@ -91,12 +70,16 @@
   .eye { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); }
   .eye svg { width: 20px; height: 20px; }
   .flows { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
-  .flow { display: flex; align-items: center; gap: 10px; background: var(--bg); border-radius: 999px; padding: 6px 14px 6px 6px; min-width: 0; }
+  .flow { display: flex; align-items: center; gap: 10px; background: color-mix(in srgb, var(--fc, #000) 8%, #ffffff); border-radius: 999px; padding: 6px 14px 6px 6px; min-width: 0; }
   .flow > i { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto; color: #ffffff; }
   .flow > i svg { width: 18px; height: 18px; stroke-width: 2.4; }
-  .flow .in { background: #4cc764; }
-  .flow .out { background: #f2711c; }
-  .flow .net { background: #4aa3ee; }
+  .flow:has(.in) { --fc: var(--pos); }
+  .flow:has(.out) { --fc: var(--danger); }
+  .flow .in { background: var(--pos-grad); }
+  .flow .out { background: var(--neg-grad); }
+  .flow .net { background: var(--grad); }
+  .flow:has(.in) b { color: var(--pos); }
+  .flow:has(.out) b { color: var(--danger); }
   .flow div { min-width: 0; }
   .flow small { display: block; font-size: 11px; color: var(--muted); }
   .flow b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -105,8 +88,8 @@
   .big { font-size: 44px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.15; margin: 6px 0 2px; }
   .big small { font-size: 22px; font-weight: 700; margin-right: 2px; letter-spacing: 0; }
   .hero-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .bar { position: relative; height: 10px; border-radius: 999px; background: var(--bg); margin-top: 16px; overflow: hidden; }
-  .bar i { display: block; height: 100%; border-radius: 999px; background: var(--s, var(--strong)); transition: width .35s ease; }
+  .bar { position: relative; height: 10px; border-radius: 999px; background: color-mix(in srgb, var(--s, #000) 12%, #ffffff); margin-top: 16px; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb, var(--s, #000) 55%, #ffffff), var(--s, #000)); transition: width .35s ease; }
   .bar .mark { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--text); opacity: .4; }
   .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: color-mix(in srgb, var(--s) var(--tint), var(--bg)); color: var(--s); white-space: nowrap; }
   .status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--s); }
@@ -137,26 +120,27 @@
   .list { background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; }
   .row { display: flex; align-items: center; gap: 14px; padding: 14px 20px; width: 100%; text-align: left; }
   .row + .row { border-top: 1px solid var(--line); }
-  .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; flex: 0 0 auto; }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--grad); color: #ffffff; display: grid; place-items: center; flex: 0 0 auto; }
   .avatar svg { width: 21px; height: 21px; }
-  .avatar.c { background: color-mix(in srgb, var(--c) var(--tint), var(--bg)); color: var(--c); }
+  .avatar.c { background: linear-gradient(135deg, color-mix(in srgb, var(--c) 55%, #ffffff) 0%, var(--c) 100%); color: #ffffff; box-shadow: 0 4px 10px -5px var(--c); }
   .row .main { flex: 1; min-width: 0; }
   .row .name { font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .meta { color: var(--muted); font-size: 13px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .end { text-align: right; font-weight: 700; font-size: 16px; white-space: nowrap; }
   .row .end .meta { font-weight: 500; }
   .plus { color: var(--pos); }
+  .minus { color: var(--danger); }
   .minus-neg { color: var(--danger); }
   .day-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 700; margin: 22px 4px 8px; }
   .day-head span { color: var(--muted); font-weight: 500; font-size: 13px; }
   .day-head span b { font-weight: 700; }
 
   .empty { background: var(--surface); border-radius: var(--radius-lg); padding: 40px 24px; text-align: center; color: var(--muted); font-size: 14px; }
-  .empty .em-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; margin: 0 auto 14px; color: var(--text); }
+  .empty .em-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--grad); display: grid; place-items: center; margin: 0 auto 14px; color: #ffffff; }
   .empty .em-icon svg { width: 28px; height: 28px; }
   .empty b { display: block; color: var(--text); font-size: 17px; margin-bottom: 4px; }
 
-  .pill { height: 56px; border-radius: 999px; background: var(--accent); color: #ffffff; box-shadow: 0 8px 18px -10px #3d9be9; font-size: 17px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: transform .12s ease, opacity .12s; }
+  .pill { height: 56px; border-radius: 999px; background: var(--grad); color: #ffffff; box-shadow: 0 10px 22px -12px rgba(0,0,0,.6); font-size: 17px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: transform .12s ease, opacity .12s; }
   .pill:active { transform: scale(.97); opacity: .9; }
   .pill svg { width: 20px; height: 20px; stroke-width: 2.4; }
 
@@ -169,8 +153,8 @@
   .cat-top .name { flex: 1; font-weight: 700; }
   .cat-top .amt { font-weight: 700; }
   .cat-top .pct { color: var(--muted); font-size: 13px; width: 44px; text-align: right; }
-  .cat-bar { height: 8px; border-radius: 999px; background: var(--bg); margin: 10px 0 0 48px; overflow: hidden; }
-  .cat-bar i { display: block; height: 100%; border-radius: 999px; background: var(--c, var(--strong)); }
+  .cat-bar { height: 8px; border-radius: 999px; background: color-mix(in srgb, var(--c, #000) 12%, #ffffff); margin: 10px 0 0 48px; overflow: hidden; }
+  .cat-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb, var(--c, #000) 55%, #ffffff), var(--c, #000)); }
 
   /* 月ごとの棒グラフ */
   .chart { background: var(--surface); border-radius: var(--radius-lg); padding: 20px 16px 14px; }
@@ -182,7 +166,7 @@
   .chart text.on { fill: var(--text); font-weight: 700; }
   .chart .grid { stroke: var(--line); stroke-width: 1; }
   .chart .goal { stroke: var(--text); stroke-width: 1; stroke-dasharray: 3 3; opacity: .45; }
-  .chart .sel-bg { fill: var(--bg); }
+  .chart .sel-bg { fill: color-mix(in srgb, var(--pos) 7%, #ffffff); }
   #dayChart { touch-action: pan-y; cursor: pointer; }
   .legend { display: flex; gap: 14px; padding: 8px 4px 0; font-size: 12px; color: var(--muted); }
   .legend span { display: inline-flex; align-items: center; gap: 6px; }
@@ -197,7 +181,7 @@
   .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: var(--muted); padding: 6px 0; }
   .tab svg { width: 24px; height: 24px; }
   .tab.active { color: var(--text); }
-  .tab-add { justify-self: center; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #ffffff; display: grid; place-items: center; box-shadow: 0 6px 16px -6px color-mix(in srgb, #3d9be9 70%, transparent); }
+  .tab-add { justify-self: center; width: 52px; height: 52px; border-radius: 50%; background: var(--grad); color: #ffffff; display: grid; place-items: center; box-shadow: 0 8px 18px -8px rgba(0,0,0,.55); }
   .tab-add svg { width: 26px; height: 26px; stroke-width: 2.4; }
   .tab-add:active { transform: scale(.94); }
 
@@ -206,10 +190,10 @@
   .scrim.open { opacity: 1; pointer-events: auto; }
   .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; max-width: 520px; margin: 0 auto; max-height: 94dvh; overflow-y: auto; background: var(--bg); border-radius: 32px 32px 0 0; padding: 10px 20px calc(24px + env(safe-area-inset-bottom)); transform: translateY(105%); transition: transform .32s cubic-bezier(.2,.9,.3,1); }
   .sheet.open { transform: translateY(0); }
-  .grabber { width: 40px; height: 5px; border-radius: 3px; background: var(--surface-2); margin: 0 auto 14px; }
+  .grabber { width: 40px; height: 5px; border-radius: 3px; background: rgba(0,0,0,.15); margin: 0 auto 14px; }
   .sheet h2 { font-size: 24px; margin: 6px 0 18px; display: flex; justify-content: space-between; align-items: center; }
 
-  .seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); border-radius: 999px; padding: 4px; margin-bottom: 14px; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); box-shadow: var(--shadow); border-radius: 999px; padding: 4px; margin-bottom: 14px; }
   .seg button { height: 40px; border-radius: 999px; font-weight: 700; font-size: 15px; color: var(--muted); }
   .seg button.on { background: var(--strong); color: var(--on-strong); }
 
@@ -223,16 +207,16 @@
 
   .cats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px 4px; margin-top: 6px; }
   .cat { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--muted); }
-  .cat i { width: 46px; height: 46px; border-radius: 50%; background: color-mix(in srgb, var(--c) var(--tint), var(--bg)); display: grid; place-items: center; color: var(--c); transition: background .15s, color .15s; }
+  .cat i { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, color-mix(in srgb, var(--c) 55%, #ffffff) 0%, var(--c) 100%); display: grid; place-items: center; color: #ffffff; transition: transform .15s, box-shadow .15s; }
   .cat i svg { width: 20px; height: 20px; }
   .cat.on { color: var(--text); }
-  .cat.on i { background: var(--c); color: #ffffff; }
+  .cat.on i { transform: scale(1.04); box-shadow: 0 0 0 3px #ffffff, 0 0 0 5.5px var(--c), 0 8px 16px -6px var(--c); }
 
   .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
   .chips::-webkit-scrollbar { display: none; }
-  .chips button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border-radius: 999px; padding: 9px 14px; font-size: 14px; font-weight: 700; }
+  .chips button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; background: #ffffff; box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.1); border-radius: 999px; padding: 9px 14px; font-size: 14px; font-weight: 700; }
   .chips button svg { width: 16px; height: 16px; }
-  .chips button.on { background: var(--strong); color: var(--on-strong); }
+  .chips button.on { background: var(--strong); color: var(--on-strong); box-shadow: none; }
   .chips button:disabled { opacity: .3; }
 
   .text-danger { color: var(--danger); font-weight: 700; font-size: 15px; padding: 14px; width: 100%; }
@@ -241,15 +225,14 @@
   .hidden { display: none !important; }
   .footnote { color: var(--muted); font-size: 13px; line-height: 1.7; margin: 14px 4px 0; }
   /* カードの軽い影 */
-  .hero, .tile, .list, .chart, .empty, .month, .icon-btn, .chip {
-    box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 6px 20px -10px rgba(0,0,0,.12);
-  }
-  /* いちばん大事なカードだけ、予算の状態の色でグラデーションの枠をつける（予算なしは水色） */
+  .hero, .tile, .list, .chart, .empty, .field, .amount { box-shadow: var(--shadow); }
+  .month, .icon-btn, .chip { box-shadow: 0 6px 14px -8px rgba(0,0,0,.45); }
+  /* いちばん大事なカードだけ、予算の状態の色でグラデーションの枠をつける（予算なしは黒） */
   .hero.hero-main {
     border: 1.5px solid transparent;
     background: linear-gradient(var(--surface), var(--surface)) padding-box,
-      linear-gradient(135deg, var(--s, #4aa3ee) 0%, color-mix(in srgb, var(--s, #4aa3ee) 25%, var(--line)) 40%, var(--line) 62%, color-mix(in srgb, var(--s, #4aa3ee) 60%, var(--line)) 100%) border-box;
-    box-shadow: 0 2px 4px rgba(0,0,0,.04), 0 16px 32px -18px color-mix(in srgb, var(--s, #4aa3ee) 50%, transparent);
+      linear-gradient(135deg, var(--s, #000) 0%, color-mix(in srgb, var(--s, #000) 18%, #ffffff) 42%, color-mix(in srgb, var(--s, #000) 8%, #ffffff) 62%, color-mix(in srgb, var(--s, #000) 60%, #ffffff) 100%) border-box;
+    box-shadow: 0 2px 6px -2px rgba(0,0,0,.06), 0 18px 36px -18px color-mix(in srgb, var(--s, #000) 45%, transparent);
   }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
@@ -307,8 +290,8 @@
     <h1>入出金</h1>
     <p class="sub">タップすると編集できます</p>
     <div class="grid3">
-      <div class="tile"><div class="label">収入</div><div class="val num" id="txIncome"></div></div>
-      <div class="tile"><div class="label">支出</div><div class="val num" id="txExpense"></div></div>
+      <div class="tile"><div class="label">収入</div><div class="val num plus" id="txIncome"></div></div>
+      <div class="tile"><div class="label">支出</div><div class="val num minus" id="txExpense"></div></div>
       <div class="tile"><div class="label">収支</div><div class="val num" id="txNet"></div></div>
     </div>
     <div id="txList"></div>
@@ -326,7 +309,7 @@
 
     <div class="section-title" style="margin-top:0">月ごとの支出 <span>直近6か月</span></div>
     <div class="chart">
-      <div class="chart-head"><div class="label" id="chartLabel"></div><div class="val num" id="chartVal"></div></div>
+      <div class="chart-head"><div class="label" id="chartLabel"></div><div class="val num minus" id="chartVal"></div></div>
       <div id="monthChart"></div>
     </div>
 
@@ -361,7 +344,7 @@
       <button class="row" id="exportBtn"><div class="avatar"><i data-icon="download"></i></div><div class="main"><div class="name">バックアップを書き出す</div><div class="meta">JSONファイルとして保存</div></div></button>
       <button class="row" id="importBtn"><div class="avatar"><i data-icon="upload"></i></div><div class="main"><div class="name">バックアップから復元</div><div class="meta">書き出したJSONを読み込む</div></div></button>
       <button class="row" id="csvBtn"><div class="avatar"><i data-icon="file-spreadsheet"></i></div><div class="main"><div class="name">CSVで書き出す</div><div class="meta">Excelやスプレッドシートで開けます</div></div></button>
-      <button class="row" id="wipeBtn"><div class="avatar" style="color:var(--danger)"><i data-icon="trash-2"></i></div><div class="main"><div class="name" style="color:var(--danger)">すべて削除</div><div class="meta">元に戻せません</div></div></button>
+      <button class="row" id="wipeBtn"><div class="avatar c" style="--c:#e5484d"><i data-icon="trash-2"></i></div><div class="main"><div class="name" style="color:var(--danger)">すべて削除</div><div class="meta">元に戻せません</div></div></button>
     </div>
     <input type="file" id="importFile" accept="application/json,.json" class="hidden">
     <p class="footnote">銀行やカードとの自動連携はありません（サーバーを使わないため）。アプリを削除したり機種変更したりするとデータは消えるので、ときどきバックアップを書き出しておくと安心です。</p>
@@ -439,16 +422,16 @@
       ['housing', '住まい', 'house', '#6e56cf'], ['utility', '水道光熱', 'zap', '#e2a336'], ['phone', '通信', 'smartphone', '#05a2c2'],
       ['hobby', '趣味', 'gamepad-2', '#8e4ec6'], ['social', '交際', 'users', '#d6409f'], ['clothes', '衣服', 'shirt', '#e54666'],
       ['beauty', '美容', 'sparkles', '#ab4aba'], ['medical', '医療', 'heart-pulse', '#e5484d'], ['study', '教育', 'graduation-cap', '#30a46c'],
-      ['subscription', 'サブスク', 'repeat', '#3e63dd'], ['cafe', 'カフェ', 'coffee', '#a07553'], ['other-ex', 'その他', 'ellipsis', '#8b8d98'],
+      ['subscription', 'サブスク', 'repeat', '#3e63dd'], ['cafe', 'カフェ', 'coffee', '#a07553'], ['other-ex', 'その他', 'ellipsis', '#1c1c1e'],
     ],
     income: [
-      ['salary', '給与', 'wallet', '#30a46c'], ['side', '副業', 'briefcase', '#12a594'], ['bonus', '臨時収入', 'gift', '#d6409f'], ['other-in', 'その他', 'ellipsis', '#8b8d98'],
+      ['salary', '給与', 'wallet', '#30a46c'], ['side', '副業', 'briefcase', '#12a594'], ['bonus', '臨時収入', 'gift', '#d6409f'], ['other-in', 'その他', 'ellipsis', '#1c1c1e'],
     ],
   };
   const CAT = {};
   Object.values(CATS).flat().forEach(([id, name, ic, color]) => (CAT[id] = { name, icon: ic, color }));
   const ACCT_TYPES = { cash: ['現金', 'banknote', '#30a46c'], bank: ['銀行', 'landmark', '#0090ff'], card: ['クレジットカード', 'credit-card', '#f76b15'], emoney: ['電子マネー', 'smartphone-nfc', '#8e4ec6'] };
-  const GRAY = '#8b8d98';
+  const GRAY = '#1c1c1e';
   const avatar = (ic, color) => `<div class="avatar c" style="--c:${color}">${icon(ic)}</div>`;
   const ACCT_ORDER = ['cash', 'bank', 'emoney', 'card'];
 
@@ -548,7 +531,7 @@
       const c = CAT[t.category] || CAT[t.type === 'income' ? 'other-in' : 'other-ex'];
       ic = c.icon; name = c.name; color = c.color;
       meta = from ? esc(from.name) : '';
-      amt = t.type === 'income' ? `<span class="num plus">+${yen(t.amount)}</span>` : `<span class="num">−${yen(t.amount)}</span>`;
+      amt = t.type === 'income' ? `<span class="num plus">+${yen(t.amount)}</span>` : `<span class="num minus">−${yen(t.amount)}</span>`;
     }
     if (t.memo) meta += (meta ? ' ・ ' : '') + esc(t.memo);
     return `<button class="row" data-tx="${t.id}">
@@ -580,13 +563,14 @@
       $('#homeBigLabel').textContent = over ? `${mLabel}の予算オーバー` : isNow ? '今月あと使える' : `${mLabel}の予算の残り`;
       $('#homeBig').innerHTML = bigYen(over ? -left : left);
       $('#homeBig').classList.toggle('t-bad', over);
+      $('#homeBig').classList.toggle('t-good', !over);
       $('#homeFlow2L').textContent = '支出'; $('#homeFlow2').textContent = yen(s.expense);
       $('#homeFlow2Icon').className = 'out'; $('#homeFlow2Icon').innerHTML = icon('arrow-up');
       const st = over ? ['s-bad', '予算オーバー'] : room >= 0 ? ['s-good', isNow ? '予算内のペース' : '予算内でした'] : ['s-warn', 'ペースが早め'];
       $('#homeStatus').innerHTML = `<span class="status ${st[0]}">${st[1]}</span>`;
       heroState(st[0]);
       const pace = isNow
-        ? `今日までの目安 <b class="num mask">${yen(ideal)}</b> ・ ${room >= 0 ? `<b class="num mask t-good">${yen(room)} 余裕</b>` : `<b class="num mask t-warn">${yen(-room)} 使いすぎ</b>`}`
+        ? `今日までの目安 <b class="num mask">${yen(ideal)}</b> ・ ${room >= 0 ? `<b class="num mask t-good">${yen(room)} 余裕</b>` : `<b class="num mask t-bad">${yen(-room)} 使いすぎ</b>`}`
         : '';
       $('#budgetBox').innerHTML = `<div class="bar ${st[0]}"><i style="width:${Math.min(100, (s.expense / b) * 100)}%"></i>${isNow ? `<b class="mark" style="left:${(done / dim) * 100}%"></b>` : ''}</div>
         <div class="hero-foot"><span>予算 <b class="num mask">${yen(b)}</b></span>
@@ -595,7 +579,7 @@
     } else {
       $('#homeBigLabel').textContent = `${mLabel}の支出`;
       $('#homeBig').innerHTML = bigYen(s.expense);
-      $('#homeBig').classList.remove('t-bad');
+      $('#homeBig').classList.remove('t-bad', 't-good');
       $('#homeFlow2L').textContent = '収支'; $('#homeFlow2').textContent = signed(s.net);
       $('#homeFlow2Icon').className = 'net'; $('#homeFlow2Icon').innerHTML = icon('arrow-left-right');
       $('#homeStatus').innerHTML = '';
@@ -607,7 +591,7 @@
     const tile = (n, label, val, cls) => { $('#dayTileL' + n).textContent = label; $('#dayTileV' + n).textContent = val; $('#dayTileV' + n).className = 'val num mask ' + (cls || ''); };
     if (isNow) {
       const todaySpent = daily[done - 1];
-      tile(1, '今日の支出', yen(todaySpent));
+      tile(1, '今日の支出', yen(todaySpent), todaySpent ? 'minus' : '');
       if (b > 0) {
         // 昨日までの残りを今日を含む残り日数で割った額が、今日使える額
         const before = s.expense - todaySpent;
@@ -642,13 +626,13 @@
     const dim = daily.length, done = elapsedDays(month), per = perDay(month);
     const sel = daySel && ym(daySel) === month ? Number(daySel.slice(8)) : Math.max(1, done);
     const selKey = `${month}-${pad(sel)}`, sv = daily[sel - 1];
-    const color = (v) => (!per ? 'var(--bar-on-1)' : v <= per ? 'var(--pos)' : 'var(--warn)');
+    const color = (v) => (!per ? 'var(--bar-on-1)' : v <= per ? 'var(--pos)' : 'var(--danger)');
 
     $('#dayPer').textContent = per ? `1日の目安 ${yen(per)}` : '';
     $('#dayLabel').textContent = fmtDay(selKey) + (selKey === today() ? ' ・ 今日' : '');
     $('#dayVal').textContent = yen(sv);
-    $('#dayVal').className = 'val num ' + (per && sel <= done ? (sv <= per ? 't-good' : 't-warn') : '');
-    $('#dayLegend').innerHTML = per ? `<span><i style="--c:var(--pos)"></i>目安以内</span><span><i style="--c:var(--warn)"></i>目安オーバー</span><span><i class="dash"></i>1日の目安</span>` : '';
+    $('#dayVal').className = 'val num ' + (per && sel <= done ? (sv <= per ? 't-good' : 't-bad') : '');
+    $('#dayLegend').innerHTML = per ? `<span><i style="--c:var(--pos)"></i>目安以内</span><span><i style="--c:var(--danger)"></i>目安オーバー</span><span><i class="dash"></i>1日の目安</span>` : '';
     $('#dayLegend').classList.toggle('hidden', !per);
 
     // 家賃のような大きな日に引っぱられないよう、目安の3倍で頭打ちにする（超えた棒は上端に切れ目を入れる）
@@ -663,10 +647,10 @@
     daily.forEach((v, i) => {
       if (i + 1 > done) return; // まだ来ていない日
       const x = step * i + (step - bw) / 2;
-      if (!v) { svg += `<rect x="${x}" y="${base - 2}" width="${bw}" height="2" rx="1" style="fill:var(--bar-muted)"/>`; return; }
+      if (!v) { svg += `<rect x="${x}" y="${base - 2}" width="${bw}" height="2" rx="1" style="fill:color-mix(in srgb, var(--pos) 35%, #ffffff)"/>`; return; }
       const h = Math.max(3, ((base - top) * Math.min(v, nice)) / nice), y = base - h, r = Math.min(bw / 2, 3, h / 2);
       svg += `<path d="M${x},${base} V${y + r} Q${x},${y} ${x + r},${y} H${x + bw - r} Q${x + bw},${y} ${x + bw},${y + r} V${base} Z" style="fill:${color(v)}"/>`;
-      if (v > nice) svg += `<line x1="${x - 1}" x2="${x + bw + 1}" y1="${y + 10}" y2="${y + 7}" style="stroke:var(--surface);stroke-width:2"/>`;
+      if (v > nice) svg += `<line x1="${x - 1}" x2="${x + bw + 1}" y1="${y + 10}" y2="${y + 7}" style="stroke:#ffffff;stroke-width:2"/>`;
     });
     if (per) { const y = base - ((base - top) * per) / nice; svg += `<line class="goal" x1="0" x2="${W}" y1="${y}" y2="${y}"/>`; }
     [1, 5, 10, 15, 20, 25, 30].filter((d) => d <= dim).forEach((d) => {
@@ -695,7 +679,7 @@
     $('#txIncome').textContent = yen(s.income);
     $('#txExpense').textContent = yen(s.expense);
     $('#txNet').textContent = signed(s.net);
-    $('#txNet').className = 'val num' + (s.net < 0 ? ' minus-neg' : '');
+    $('#txNet').className = 'val num' + (s.net < 0 ? ' minus-neg' : s.net > 0 ? ' plus' : '');
     const list = inMonth(month).sort(byNewest);
     if (!list.length) { $('#txList').innerHTML = `<div style="margin-top:16px">${emptyHTML('receipt', 'この月の記録はありません', '下の＋ボタンから記録できます')}</div>`; return; }
     const days = {};
@@ -703,7 +687,7 @@
     const per = perDay(month);
     $('#txList').innerHTML = Object.keys(days).map((d) => {
       const out = days[d].filter((t) => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-      const cls = per ? (out <= per ? 't-good' : 't-warn') : '';
+      const cls = per ? (out <= per ? 't-good' : 't-bad') : '';
       return `<div class="day-head"><b>${fmtDay(d)}</b><span class="num">${out ? `支出 <b class="${cls}">${yen(out)}</b>` : ''}</span></div><div class="list">${days[d].map(txRow).join('')}</div>`;
     }).join('');
   }
@@ -728,7 +712,7 @@
     keys.forEach((k, i) => {
       const v = vals[i].expense, h = v ? Math.max(4, ((base - top) * v) / nice) : 0;
       const x = step * i + (step - bw) / 2, y = base - h, on = k === sel, r = Math.min(4, h / 2);
-      if (h) svg += `<path d="M${x},${base} V${y + r} Q${x},${y} ${x + r},${y} H${x + bw - r} Q${x + bw},${y} ${x + bw},${y + r} V${base} Z" style="fill:${on ? 'url(#bg1)' : 'var(--bar-muted)'}"/>`;
+      if (h) svg += `<path d="M${x},${base} V${y + r} Q${x},${y} ${x + r},${y} H${x + bw - r} Q${x + bw},${y} ${x + bw},${y + r} V${base} Z" style="fill:url(#bg1);opacity:${on ? 1 : .22}"/>`;
       svg += `<text x="${x + bw / 2}" y="${base + 18}" text-anchor="middle" class="${on ? 'on' : ''}">${Number(k.slice(5))}月</text>`;
       svg += `<rect class="bar-hit" data-bar="${k}" x="${step * i}" y="0" width="${step}" height="${H}" fill="transparent"><title>${ymLabel(k)} 支出 ${yen(v)}</title></rect>`;
     });
@@ -741,9 +725,9 @@
     $('#catTotal').textContent = sum ? yen(sum) : '';
     const rows = Object.entries(totals).sort((a, b) => b[1] - a[1]);
     const top1 = rows.length ? rows[0][1] : 1;
-    $('#catList').innerHTML = rows.length ? `<div class="list">${rows.map(([id, v]) => { const c = CAT[id] || CAT['other-ex']; return `<div class="cat-row">
+    $('#catList').innerHTML = rows.length ? `<div class="list">${rows.map(([id, v]) => { const c = CAT[id] || CAT['other-ex']; return `<div class="cat-row" style="--c:${c.color}">
         <div class="cat-top">${avatar(c.icon, c.color)}<div class="name">${c.name}</div><div class="amt num">${yen(v)}</div><div class="pct num">${Math.round((v / sum) * 100)}%</div></div>
-        <div class="cat-bar"><i style="width:${(v / top1) * 100}%;--c:${c.color}"></i></div></div>`; }).join('')}</div>`
+        <div class="cat-bar"><i style="width:${(v / top1) * 100}%"></i></div></div>`; }).join('')}</div>`
       : emptyHTML('chart-column', 'この月の支出はありません', '記録するとカテゴリごとの内訳が出ます');
   }
   $('#monthChart').addEventListener('click', (e) => { const b = e.target.closest('[data-bar]'); if (b) { chartSel = b.dataset.bar; renderAnalysis(); } });
