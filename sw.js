@@ -5,7 +5,6 @@ const FILES = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './fonts/app-fonts.css',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png'
@@ -24,7 +23,6 @@ self.addEventListener('activate', (e) => {
 });
 
 // キャッシュにあればそれを返す。なければ取りに行って保存する
-// （フォントは使った文字の分だけ、初回表示時に保存される）
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
