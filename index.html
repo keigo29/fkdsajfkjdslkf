@@ -224,13 +224,25 @@
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
   .hidden { display: none !important; }
   .footnote { color: var(--muted); font-size: 13px; line-height: 1.7; margin: 14px 4px 0; }
-  /* カードの軽い影 */
-  .hero, .tile, .list, .chart, .empty, .field, .amount { box-shadow: var(--shadow); }
-  .month, .icon-btn, .chip { box-shadow: 0 6px 14px -8px rgba(0,0,0,.45); }
-  /* いちばん大事なカードだけ、予算の状態の色（予算なしは黒）の影をつける */
-  .hero.hero-main {
-    box-shadow: 0 1px 4px -1px rgba(0,0,0,.05), 0 12px 28px -16px color-mix(in srgb, var(--s, #000) 30%, transparent);
-  }
+  /* カードは使わない：箱・影・角丸をなくし、白い画面に直接並べて細い線と余白で区切る */
+  .hero, .tile, .list, .chart, .empty, .field, .amount, .seg { background: transparent; box-shadow: none; border-radius: 0; }
+  .hero { padding: 4px 0 20px; margin-bottom: 0; border-bottom: 1px solid var(--line); }
+  .grid2 .tile, .grid3 .tile { padding: 16px 0; }
+  .grid2 .tile + .tile, .grid3 .tile + .tile { padding-left: 16px; border-left: 1px solid var(--line); }
+  #view-home .grid2 { gap: 0; border-bottom: 1px solid var(--line); }
+  #view-txs .grid3 { gap: 0; border-bottom: 1px solid var(--line); }
+  .row, .cat-row { padding-left: 0; padding-right: 0; }
+  .chart { padding: 8px 0 0; }
+  .chart-head { padding: 0 0 6px; }
+  .legend { padding: 8px 0 0; }
+  .empty { padding: 32px 0; }
+  .field, .amount { padding-left: 0; padding-right: 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .sheet .grid2 { gap: 16px !important; }
+  .seg { padding: 0; }
+  .day-head { margin-left: 0; margin-right: 0; }
+  .month, .icon-btn, .chip { box-shadow: none; }
+  .cats { padding: 6px 4px 4px; }
+  .sheet .pill { margin-top: 8px; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 </head>
