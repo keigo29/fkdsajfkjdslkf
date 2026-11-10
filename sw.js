@@ -1,6 +1,6 @@
 // オフラインでも開けるように、アプリ本体をキャッシュする
 // ファイルを更新したら CACHE の番号を上げると、利用者側も新しい版に切り替わる
-const CACHE = 'kakei-v3';
+const CACHE = 'kakei-v4';
 const FILES = [
   './',
   './index.html',
@@ -24,7 +24,13 @@ self.addEventListener('activate', (e) => {
 
 // キャッシュにあればそれを返す。なければ取りに行って保存する
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
+  if (e.request.method !== 'GET') return;
+  // 連携JSON（kakei-data.json など）はキャッシュせず、常に最新を取りに行く
+  if (new URL(e.request.url).pathname.endsWith('.json')) {
+    e.respondWith(fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request)));
+    return;
+  }
+  if (new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
     caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }

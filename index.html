@@ -377,6 +377,11 @@
     <div class="list">
       <button class="row" id="budgetBtn"><div class="avatar"><i data-icon="target"></i></div><div class="main"><div class="name">月の予算</div><div class="meta" id="budgetMeta"></div></div></button>
     </div>
+    <div class="section-title">連携</div>
+    <div class="list">
+      <button class="row" id="syncNowBtn"><div class="avatar"><i data-icon="repeat"></i></div><div class="main"><div class="name">Cmdから読み込む</div><div class="meta" id="syncMeta">連携URLが未設定です</div></div></button>
+      <button class="row" id="syncUrlBtn"><div class="avatar"><i data-icon="settings"></i></div><div class="main"><div class="name">連携URLを設定</div><div class="meta">Cmd内のJSONのURLを、この端末にだけ保存します</div></div></button>
+    </div>
     <div class="section-title">データ</div>
     <div class="list">
       <button class="row" id="exportBtn"><div class="avatar"><i data-icon="download"></i></div><div class="main"><div class="name">バックアップを書き出す</div><div class="meta">JSONファイルとして保存</div></div></button>
@@ -385,7 +390,7 @@
       <button class="row" id="wipeBtn"><div class="avatar c" style="--c:#e5484d"><i data-icon="trash-2"></i></div><div class="main"><div class="name" style="color:var(--danger)">すべて削除</div><div class="meta">元に戻せません</div></div></button>
     </div>
     <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-    <p class="footnote">銀行やカードとの自動連携はありません（サーバーを使わないため）。アプリを削除したり機種変更したりするとデータは消えるので、ときどきバックアップを書き出しておくと安心です。</p>
+    <p class="footnote">マネーフォワードのデータは、TEDDYがCmdにJSONで置いたものを「Cmdから読み込む」で取り込めます（連携URLはこの端末にだけ保存され、サイトのコードには含まれません）。アプリを削除したり機種変更したりするとデータは消えるので、ときどきバックアップを書き出しておくと安心です。</p>
   </section>
 </div>
 
@@ -438,6 +443,17 @@
   <label class="amount"><span>¥</span><input id="bAmount" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="月の予算"></label>
   <p class="footnote" style="margin:-4px 4px 14px">1か月の支出の目安です。0にすると予算の表示を消します。</p>
   <button class="pill" id="saveBudget">保存する</button>
+</div>
+
+<!-- 連携シート -->
+<div class="sheet" id="syncSheet" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
+  <div class="grabber"></div>
+  <h2><span id="syncTitle">連携URL</span><button class="icon-btn" data-close aria-label="閉じる"><i data-icon="x"></i></button></h2>
+  <div class="field"><label for="syncUrl">JSONのURL</label><input id="syncUrl" placeholder="https://…" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+  <p class="footnote" style="margin:-4px 4px 10px">Cmdは非公開リポジトリなので、公開サイトから無認証では読めません。読み込めるURL（GitHubのraw URLなど）をここに入れると、この端末にだけ保存され、次回から「Cmdから読み込む」で取得できます。URLはサイトのコードには含まれません。</p>
+  <div class="field"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="syncAuto" style="width:auto"> アプリを開くたびに自動で読み込む</label></div>
+  <button class="pill" id="saveSyncUrl">保存して読み込む</button>
+  <button class="text-danger" id="clearSyncUrl">連携URLを削除</button>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
@@ -797,6 +813,7 @@
   // ---- 設定 ----
   function renderSettings() {
     $('#budgetMeta').textContent = db.settings.budget > 0 ? `${yen(db.settings.budget)} / 月` : '未設定';
+    renderSyncMeta();
   }
 
   function render() {
@@ -952,6 +969,73 @@
     if (!confirm('すべての口座と記録を削除します。元に戻せません。')) return;
     db = fresh(); save(); render(); toast('すべて削除しました');
   });
+
+  // ---- Cmd連携（URLのJSONを読み込む） ----
+  // 連携URLはこの端末のlocalStorageにだけ保存する。サイトのコードには含めない。
+  const SYNC_KEY = 'kakei-sync';
+  function syncCfg() { try { return JSON.parse(localStorage.getItem(SYNC_KEY)) || {}; } catch (e) { return {}; } }
+  function setSyncCfg(c) { try { localStorage.setItem(SYNC_KEY, JSON.stringify(c)); } catch (e) {} renderSyncMeta(); }
+  function renderSyncMeta() {
+    const el = $('#syncMeta'); if (!el) return;
+    const c = syncCfg();
+    el.textContent = c.url ? `設定済み${c.auto ? '・自動読み込みON' : ''}（最終取得: ${c.last || 'まだ'}）` : '連携URLが未設定です';
+  }
+  function applyJson(d) {
+    if (!d || !Array.isArray(d.txs) || !Array.isArray(d.accounts) || !d.accounts.length) throw new Error('bad format');
+    db = { version: 1, settings: d.settings || { budget: 0 }, accounts: d.accounts, txs: d.txs };
+    save(); render();
+  }
+  async function fetchJson(url) {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('http ' + res.status);
+    return res.json();
+  }
+  async function syncFromUrl(manual) {
+    const c = syncCfg();
+    if (!c.url) {
+      // 同じ場所に kakei-data.json が置いてあれば、それを読む（初回は空のときだけ自動）
+      try {
+        const d = await fetchJson('./kakei-data.json');
+        if (!manual && db.txs.length) return;
+        if (manual && !confirm(`${d.txs.length}件の記録で置き換えます。よろしいですか？`)) return;
+        applyJson(d); toast('kakei-data.json を読み込みました'); return;
+      } catch (e) { if (manual) { toast('連携URLを設定してください'); openSync(); } return; }
+    }
+    try {
+      if (manual) toast('読み込んでいます…');
+      const d = await fetchJson(c.url);
+      if (!d || !Array.isArray(d.txs)) throw new Error('bad format');
+      if (manual && !confirm(`${d.txs.length}件の記録で置き換えます。よろしいですか？`)) return;
+      applyJson(d);
+      setSyncCfg({ ...c, last: today() });
+      toast('Cmdから読み込みました');
+    } catch (e) { if (manual) toast('読み込めませんでした。URLを確認してください'); }
+  }
+  function openSync() {
+    const c = syncCfg();
+    $('#syncUrl').value = c.url || '';
+    $('#syncAuto').checked = !!c.auto;
+    openSheet('#syncSheet');
+  }
+  $('#syncNowBtn').addEventListener('click', () => syncFromUrl(true));
+  $('#syncUrlBtn').addEventListener('click', openSync);
+  $('#saveSyncUrl').addEventListener('click', () => {
+    const url = $('#syncUrl').value.trim();
+    if (!url) { toast('URLを入力してください'); return; }
+    setSyncCfg({ url, auto: $('#syncAuto').checked, last: syncCfg().last || '' });
+    closeSheets(); syncFromUrl(true);
+  });
+  $('#clearSyncUrl').addEventListener('click', () => {
+    try { localStorage.removeItem(SYNC_KEY); } catch (e) {}
+    closeSheets(); renderSyncMeta(); toast('連携URLを削除しました');
+  });
+  // 起動時: ?data=URL があればそれを連携URLとして保存し、自動設定があれば読み込む
+  try {
+    const q = new URLSearchParams(location.search).get('data');
+    if (q) setSyncCfg({ ...syncCfg(), url: q });
+  } catch (e) {}
+  if (syncCfg().auto && syncCfg().url) syncFromUrl(false);
+  else if (!syncCfg().url && !db.txs.length) syncFromUrl(false);
 
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') render(); });
   // 金額を隠す（人前で開くとき用）。この端末だけの見た目の設定
