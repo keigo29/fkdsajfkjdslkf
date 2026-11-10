@@ -379,8 +379,8 @@
     </div>
     <div class="section-title">連携</div>
     <div class="list">
-      <button class="row" id="syncNowBtn"><div class="avatar"><i data-icon="repeat"></i></div><div class="main"><div class="name">Cmdから読み込む</div><div class="meta" id="syncMeta">連携URLが未設定です</div></div></button>
-      <button class="row" id="syncUrlBtn"><div class="avatar"><i data-icon="settings"></i></div><div class="main"><div class="name">連携URLを設定</div><div class="meta">Cmd内のJSONのURLを、この端末にだけ保存します</div></div></button>
+      <button class="row" id="syncNowBtn"><div class="avatar"><i data-icon="repeat"></i></div><div class="main"><div class="name">Cmdから読み込む</div><div class="meta" id="syncMeta">連携が未設定です</div></div></button>
+      <button class="row" id="syncUrlBtn"><div class="avatar"><i data-icon="settings"></i></div><div class="main"><div class="name">連携を設定</div><div class="meta">読み取り専用トークンかURLを、この端末にだけ保存します</div></div></button>
     </div>
     <div class="section-title">データ</div>
     <div class="list">
@@ -390,7 +390,7 @@
       <button class="row" id="wipeBtn"><div class="avatar c" style="--c:#e5484d"><i data-icon="trash-2"></i></div><div class="main"><div class="name" style="color:var(--danger)">すべて削除</div><div class="meta">元に戻せません</div></div></button>
     </div>
     <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-    <p class="footnote">マネーフォワードのデータは、TEDDYがCmdにJSONで置いたものを「Cmdから読み込む」で取り込めます（連携URLはこの端末にだけ保存され、サイトのコードには含まれません）。アプリを削除したり機種変更したりするとデータは消えるので、ときどきバックアップを書き出しておくと安心です。</p>
+    <p class="footnote">マネーフォワードのデータは、TEDDYがCmdにJSONで置いたものを「Cmdから読み込む」で取り込めます（連携設定はこの端末にだけ保存され、サイトのコードには含まれません）。アプリを削除したり機種変更したりするとデータは消えるので、ときどきバックアップを書き出しておくと安心です。</p>
   </section>
 </div>
 
@@ -448,12 +448,15 @@
 <!-- 連携シート -->
 <div class="sheet" id="syncSheet" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
   <div class="grabber"></div>
-  <h2><span id="syncTitle">連携URL</span><button class="icon-btn" data-close aria-label="閉じる"><i data-icon="x"></i></button></h2>
-  <div class="field"><label for="syncUrl">JSONのURL</label><input id="syncUrl" placeholder="https://…" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
-  <p class="footnote" style="margin:-4px 4px 10px">Cmdは非公開リポジトリなので、公開サイトから無認証では読めません。読み込めるURL（GitHubのraw URLなど）をここに入れると、この端末にだけ保存され、次回から「Cmdから読み込む」で取得できます。URLはサイトのコードには含まれません。</p>
+  <h2><span id="syncTitle">連携設定</span><button class="icon-btn" data-close aria-label="閉じる"><i data-icon="x"></i></button></h2>
+  <div class="field"><label for="syncRepo">リポジトリ</label><input id="syncRepo" value="keigo29/Cmd" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+  <div class="field"><label for="syncPath">ファイル</label><input id="syncPath" value="Data/kakei.json" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+  <div class="field"><label for="syncToken">読み取り専用トークン（GitHub）</label><input id="syncToken" type="password" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+  <p class="footnote" style="margin:-4px 4px 10px">トークンの作り方：GitHubの Settings → Developer settings → Personal access tokens → Fine-grained tokens で、新しいトークンを作成。Repository access は Cmd だけ、Permissions は Contents の Read-only を選びます。トークンはこの端末にだけ保存され、サイトのコードには含まれません。期限を長め（最大1年）にすると、貼り直しは年1回で済みます。</p>
+  <div class="field"><label for="syncUrl">JSONのURL（トークンを使わない場合）</label><input id="syncUrl" placeholder="https://…" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
   <div class="field"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="syncAuto" style="width:auto"> アプリを開くたびに自動で読み込む</label></div>
   <button class="pill" id="saveSyncUrl">保存して読み込む</button>
-  <button class="text-danger" id="clearSyncUrl">連携URLを削除</button>
+  <button class="text-danger" id="clearSyncUrl">連携設定を削除</button>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
@@ -970,49 +973,63 @@
     db = fresh(); save(); render(); toast('すべて削除しました');
   });
 
-  // ---- Cmd連携（URLのJSONを読み込む） ----
-  // 連携URLはこの端末のlocalStorageにだけ保存する。サイトのコードには含めない。
+  // ---- Cmd連携（読み取り専用トークン or URL でJSONを読み込む） ----
+  // 連携設定はこの端末のlocalStorageにだけ保存する。サイトのコードには含めない。
   const SYNC_KEY = 'kakei-sync';
   function syncCfg() { try { return JSON.parse(localStorage.getItem(SYNC_KEY)) || {}; } catch (e) { return {}; } }
   function setSyncCfg(c) { try { localStorage.setItem(SYNC_KEY, JSON.stringify(c)); } catch (e) {} renderSyncMeta(); }
   function renderSyncMeta() {
     const el = $('#syncMeta'); if (!el) return;
     const c = syncCfg();
-    el.textContent = c.url ? `設定済み${c.auto ? '・自動読み込みON' : ''}（最終取得: ${c.last || 'まだ'}）` : '連携URLが未設定です';
+    const mode = c.token ? 'トークン連携' : c.url ? 'URL連携' : '';
+    el.textContent = mode ? `${mode}・設定済み${c.auto ? '・自動読み込みON' : ''}（最終取得: ${c.last || 'まだ'}）` : '連携が未設定です';
   }
   function applyJson(d) {
     if (!d || !Array.isArray(d.txs) || !Array.isArray(d.accounts) || !d.accounts.length) throw new Error('bad format');
     db = { version: 1, settings: d.settings || { budget: 0 }, accounts: d.accounts, txs: d.txs };
     save(); render();
   }
-  async function fetchJson(url) {
-    const res = await fetch(url, { cache: 'no-store' });
+  async function fetchJson(url, headers) {
+    const res = await fetch(url, { cache: 'no-store', headers: headers || {} });
     if (!res.ok) throw new Error('http ' + res.status);
     return res.json();
   }
+  function syncTarget(c) {
+    if (c.token) {
+      const repo = (c.repo || 'keigo29/Cmd').trim().replace(/^\/+|\/+$/g, '');
+      const path = (c.path || 'Data/kakei.json').trim().replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+      return { url: `https://api.github.com/repos/${repo}/contents/${path}`, headers: { Authorization: `Bearer ${c.token}`, Accept: 'application/vnd.github.raw+json' } };
+    }
+    if (c.url) return { url: c.url, headers: {} };
+    return null;
+  }
   async function syncFromUrl(manual) {
     const c = syncCfg();
-    if (!c.url) {
+    const t = syncTarget(c);
+    if (!t) {
       // 同じ場所に kakei-data.json が置いてあれば、それを読む（初回は空のときだけ自動）
       try {
         const d = await fetchJson('./kakei-data.json');
         if (!manual && db.txs.length) return;
         if (manual && !confirm(`${d.txs.length}件の記録で置き換えます。よろしいですか？`)) return;
         applyJson(d); toast('kakei-data.json を読み込みました'); return;
-      } catch (e) { if (manual) { toast('連携URLを設定してください'); openSync(); } return; }
+      } catch (e) { if (manual) { toast('連携を設定してください'); openSync(); } return; }
     }
     try {
       if (manual) toast('読み込んでいます…');
-      const d = await fetchJson(c.url);
+      const d = await fetchJson(t.url, t.headers);
       if (!d || !Array.isArray(d.txs)) throw new Error('bad format');
       if (manual && !confirm(`${d.txs.length}件の記録で置き換えます。よろしいですか？`)) return;
       applyJson(d);
       setSyncCfg({ ...c, last: today() });
       toast('Cmdから読み込みました');
-    } catch (e) { if (manual) toast('読み込めませんでした。URLを確認してください'); }
+    } catch (e) { if (manual) toast(c.token ? '読み込めませんでした。トークンを確認してください' : '読み込めませんでした。URLを確認してください'); }
   }
   function openSync() {
     const c = syncCfg();
+    $('#syncRepo').value = c.repo || 'keigo29/Cmd';
+    $('#syncPath').value = c.path || 'Data/kakei.json';
+    $('#syncToken').value = c.token || '';
     $('#syncUrl').value = c.url || '';
     $('#syncAuto').checked = !!c.auto;
     openSheet('#syncSheet');
@@ -1020,22 +1037,29 @@
   $('#syncNowBtn').addEventListener('click', () => syncFromUrl(true));
   $('#syncUrlBtn').addEventListener('click', openSync);
   $('#saveSyncUrl').addEventListener('click', () => {
-    const url = $('#syncUrl').value.trim();
-    if (!url) { toast('URLを入力してください'); return; }
-    setSyncCfg({ url, auto: $('#syncAuto').checked, last: syncCfg().last || '' });
+    const cfg = {
+      repo: $('#syncRepo').value.trim() || 'keigo29/Cmd',
+      path: $('#syncPath').value.trim() || 'Data/kakei.json',
+      token: $('#syncToken').value.trim(),
+      url: $('#syncUrl').value.trim(),
+      auto: $('#syncAuto').checked,
+      last: syncCfg().last || '',
+    };
+    if (!cfg.token && !cfg.url) { toast('トークンかURLを入力してください'); return; }
+    setSyncCfg(cfg);
     closeSheets(); syncFromUrl(true);
   });
   $('#clearSyncUrl').addEventListener('click', () => {
     try { localStorage.removeItem(SYNC_KEY); } catch (e) {}
-    closeSheets(); renderSyncMeta(); toast('連携URLを削除しました');
+    closeSheets(); renderSyncMeta(); toast('連携設定を削除しました');
   });
   // 起動時: ?data=URL があればそれを連携URLとして保存し、自動設定があれば読み込む
   try {
     const q = new URLSearchParams(location.search).get('data');
     if (q) setSyncCfg({ ...syncCfg(), url: q });
   } catch (e) {}
-  if (syncCfg().auto && syncCfg().url) syncFromUrl(false);
-  else if (!syncCfg().url && !db.txs.length) syncFromUrl(false);
+  if (syncCfg().auto && syncTarget(syncCfg())) syncFromUrl(false);
+  else if (!syncTarget(syncCfg()) && !db.txs.length) syncFromUrl(false);
 
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') render(); });
   // 金額を隠す（人前で開くとき用）。この端末だけの見た目の設定

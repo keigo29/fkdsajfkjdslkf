@@ -1,6 +1,6 @@
 // オフラインでも開けるように、アプリ本体をキャッシュする
 // ファイルを更新したら CACHE の番号を上げると、利用者側も新しい版に切り替わる
-const CACHE = 'kakei-v4';
+const CACHE = 'kakei-v5';
 const FILES = [
   './',
   './index.html',
@@ -25,6 +25,8 @@ self.addEventListener('activate', (e) => {
 // キャッシュにあればそれを返す。なければ取りに行って保存する
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  // GitHub API（トークン連携）は横取りしない
+  if (new URL(e.request.url).hostname === 'api.github.com') return;
   // 連携JSON（kakei-data.json など）はキャッシュせず、常に最新を取りに行く
   if (new URL(e.request.url).pathname.endsWith('.json')) {
     e.respondWith(fetch(e.request, { cache: 'no-store' }).catch(() => caches.match(e.request)));
